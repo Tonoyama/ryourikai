@@ -156,5 +156,5 @@ fig.update_yaxes(title_text="灰分（%）", row=1, col=1)
 fig.update_yaxes(title_text="タンパク質（%）", row=2, col=1)
 fig.update_yaxes(title_text="灰分（%）", row=2, col=2)
 
-fig.write_html("/Users/ytonoyam/Dev/ryourikai/flour_matrix.html")
+fig.write_html("/Users/ytonoyam/Dev/ryourikai/units/cross/cost-analysis/dist/flour_matrix.html")
 print("Saved: flour_matrix.html")

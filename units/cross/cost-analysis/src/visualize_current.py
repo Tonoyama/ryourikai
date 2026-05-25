@@ -15,12 +15,11 @@ items = [
     ("豚バラブロック 1kg", "Ramen II", 1706),
     ("ニップン冷凍パイシート", "デザート", 1485),
     ("比内地鶏 鶏皮 1kg", "Ramen I", 1404),
-    ("愛媛 完熟レモン 1kg", "ドリンク", 1296),
+    ("広島レモン 2個", "お口直し", 523),
     ("生茶葉 50g", "グラニテ", 594),
     ("豚背ガラ 4kg", "Ramen II", 1056),
     ("有明海苔 20枚", "Ramen II", 944),
     ("冷凍ラズベリー 170g", "デザート", 900),
-    ("真妻わさび 200g", "前菜", 880),
     ("春よ恋 2.5kg", "製麺", 648),
     ("スパークリンググレープ", "ドリンク", 626),
     ("比内地鶏ミンチ", "Ramen I", 594),
@@ -28,7 +27,7 @@ items = [
     ("スナップドラゴン 50g", "デザート", 442),
     ("鶏卵 10個", "共通", 307),
     # 別途購入
-    ("米澤豚モモ 1.2kg", "Ramen I", 1477),
+    ("実山椒 50g", "Ramen I", 458),
     ("豚バラ追加 500g", "Ramen II", 850),
     ("鶏卵追加 8個", "共通", 200),
     ("穂先メンマ水煮 360g", "Ramen II", 300),
@@ -148,7 +147,7 @@ fig.update_layout(
 fig.update_xaxes(row=1, col=1, title_text="金額（円）")
 fig.update_yaxes(row=2, col=2, title_text="金額（円）")
 
-fig.write_html("/Users/ytonoyam/Dev/ryourikai/cost_current.html")
+fig.write_html("/Users/ytonoyam/Dev/ryourikai/units/cross/cost-analysis/dist/cost_current.html")
 print(f"総合計: ¥{total:,}")
 print(f"12人提供 / 10人負担: ¥{per_person_10:,.0f}/人")
 print()

@@ -6,8 +6,7 @@ from plotly.subplots import make_subplots
 courses = {
     "前菜\n鮪中落ち": [
         ("本マグロ中落ち", 2354),
-        ("真妻わさび", 880),
-        # たまりは価格に含めない
+        # 青種・赤種わさび、たまりは価格に含めない（未確定）
     ],
     "Ramen I\n比内地鶏清湯": [
         ("比内地鶏ガラ", 1944),
@@ -26,7 +25,6 @@ courses = {
         ("豚背ガラ", 1056),
         ("豚バラブロック(焼豚)", 1706),
         ("豚バラ追加500g", 850),
-        ("米澤豚モモ(コンフィ→Ramen I)", 0),  # Ramen Iに移すべきだが元はRamen I用
         ("有明海苔", 944),
         ("鶏卵(味玉12個分)", 350),
         ("春よ恋(720g分)", 187),
@@ -41,10 +39,9 @@ courses = {
         ("マデイラワイン等", 0),  # 価格に含めない
     ],
     "Dessert\nバニラアイス\n+ガストリック": [
-        ("白バラクリーム48%", 1208),
+        ("生クリーム45%", 583),
         ("バニラビーンズ(3本分)", 744),
         ("粉飴(100g分)", 126),
-        ("スキムミルク(40g分)", 50),
         ("牛乳(750ml)", 200),
         ("鶏卵(アイス卵黄3個分)", 100),
         ("グラニュー糖", 50),
@@ -52,14 +49,14 @@ courses = {
     ],
     "ドリンク\n6種": [
         ("清美タンゴール10kg", 3480),
-        ("完熟レモン", 1296),
+        ("広島レモン(2個)", 523),
         ("スパークリンググレープ", 626),
         ("コーラ・エルダーフラワー等", 700),
     ],
 }
 
-# Ramen Iにコンフィを追加
-courses["Ramen I\n比内地鶏清湯"].append(("米澤豚モモ(コンフィ)", 1477))
+# Ramen I に 実山椒（ツミレ・トッピング両用）を追加
+courses["Ramen I\n比内地鶏清湯"].append(("実山椒(50g)", 458))
 
 # 集計
 course_names = []
@@ -170,7 +167,7 @@ fig.update_layout(
 fig.update_yaxes(row=1, col=1, title_text="金額（円）")
 fig.update_yaxes(row=2, col=2, title_text="金額（円）")
 
-fig.write_html("/Users/ytonoyam/Dev/ryourikai/cost_by_course.html")
+fig.write_html("/Users/ytonoyam/Dev/ryourikai/units/cross/cost-analysis/dist/cost_by_course.html")
 
 # テキスト出力
 print("=" * 50)

@@ -12,32 +12,28 @@ categories = {
         ("豚バラブロック", 1706),
         ("比内地鶏 鶏皮", 1404),
         ("豚背ガラ", 1056),
-        ("米澤豚モモ(コンフィ)", 1477),
         ("比内地鶏ミンチ", 594),
+        ("実山椒(50g)", 458),
         ("豚バラ追加500g", 850),
         ("鶏卵", 507),
     ],
     "デザート": [
-        ("バニラビーンズ", 2480),
-        ("白バラ純生クリーム48%", 1208),
+        ("生クリーム45%", 583),
         ("冷凍パイシート", 1485),
         ("粉飴", 1256),
         ("冷凍ラズベリー", 900),
         ("紅ほっぺ", 578),
         ("スナップドラゴン", 442),
-        ("スキムミルク", 400),
     ],
     "ドリンク": [
         ("清美タンゴール10kg", 3480),
-        ("完熟レモン", 1296),
+        ("広島レモン(2個)", 523),
         ("スパークリンググレープ", 626),
     ],
     "製麺・調味料": [
         ("春よ恋", 648),
         ("生茶葉", 1188),
         ("有明海苔", 944),
-        ("真妻わさび", 880),
-        ("黒トリュフ", 1000),
     ],
     "その他・雑費": [
         ("調味料・牛乳等", 3500),
@@ -143,7 +139,7 @@ fig.update_layout(
 fig.update_yaxes(row=1, col=2, title_text="金額（円）")
 fig.update_xaxes(row=2, col=1, title_text="金額（円）")
 
-fig.write_html("/Users/ytonoyam/Dev/ryourikai/cost_breakdown.html")
+fig.write_html("/Users/ytonoyam/Dev/ryourikai/units/cross/cost-analysis/dist/cost_breakdown.html")
 print(f"総合計: ¥{total:,}")
 print(f"1人あたり: ¥{per_person:,.0f}")
 print("Saved: cost_breakdown.html")

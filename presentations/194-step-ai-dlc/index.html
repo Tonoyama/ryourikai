@@ -1,0 +1,1286 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>194工程のコース料理を AI-DLC で管理してみよう</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reset.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/theme/black.css"
+      id="theme"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/highlight/monokai.css"
+    />
+    <style>
+      :root {
+        --accent: #c8102e;
+        --accent2: #ffd166;
+        --soft: #e6e6e6;
+      }
+      .reveal {
+        font-family:
+          "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic",
+          "Noto Sans CJK JP", system-ui, sans-serif;
+        letter-spacing: 0.01em;
+      }
+      .reveal h1,
+      .reveal h2,
+      .reveal h3 {
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: none;
+      }
+      .reveal h1 {
+        font-size: 2.2em;
+      }
+      .reveal h2 {
+        font-size: 1.6em;
+        color: var(--accent2);
+      }
+      .reveal h3 {
+        font-size: 1.15em;
+        color: var(--soft);
+      }
+      .reveal section img {
+        border: 0;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        border-radius: 6px;
+        max-height: 500px;
+        object-fit: cover;
+        display: block;
+        margin: 0 auto;
+      }
+      .reveal pre {
+        box-shadow: none;
+        font-size: 0.55em;
+      }
+      .reveal pre code {
+        padding: 1em;
+        border-radius: 6px;
+        max-height: 560px;
+        overflow: auto;
+      }
+      .reveal table {
+        font-size: 0.7em;
+      }
+      .reveal table th {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--accent2);
+      }
+      .reveal table td,
+      .reveal table th {
+        padding: 0.35em 0.7em;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      }
+      .small {
+        font-size: 0.6em;
+        color: #aaa;
+      }
+      .tag {
+        display: inline-block;
+        padding: 0.1em 0.6em;
+        border: 1px solid var(--accent2);
+        color: var(--accent2);
+        border-radius: 999px;
+        font-size: 0.5em;
+        letter-spacing: 0.1em;
+      }
+      .accent {
+        color: var(--accent2);
+      }
+      .muted {
+        color: #888;
+      }
+      .hero {
+        background-size: cover;
+        background-position: center;
+      }
+      .hero-overlay {
+        background: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.05) 0%,
+          rgba(0, 0, 0, 0.85) 100%
+        );
+        padding: 2em;
+        border-radius: 10px;
+      }
+      .grid {
+        display: grid;
+        gap: 12px;
+      }
+      .grid-2 {
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+      }
+      .grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      .grid-6 {
+        grid-template-columns: repeat(6, 1fr);
+      }
+      .grid img {
+        width: 100%;
+        height: 130px;
+        object-fit: cover;
+        display: block;
+        border-radius: 4px;
+        margin: 4px 0;
+        box-shadow: none;
+      }
+      .grid img.no-crop {
+        object-fit: contain;
+        background: rgba(0, 0, 0, 0.3);
+      }
+      .grid-2 img {
+        height: 340px;
+        max-height: 340px;
+      }
+      .grid-3 img {
+        height: 130px;
+      }
+      .grid-4 img {
+        height: 110px;
+      }
+      .grid-6 img {
+        height: 95px;
+      }
+      .card {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 0.5em 0.8em;
+        border-radius: 8px;
+      }
+      .card h3 {
+        font-size: 0.95em;
+        margin: 0.15em 0;
+      }
+      .card p {
+        margin: 0.2em 0;
+      }
+      .stat {
+        font-size: 4em;
+        font-weight: 800;
+        color: var(--accent2);
+        line-height: 1;
+      }
+      .stat-label {
+        font-size: 0.7em;
+        letter-spacing: 0.18em;
+        color: #ccc;
+        text-transform: uppercase;
+      }
+      .tree {
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        text-align: left;
+        font-size: 0.8em;
+        background: rgba(0, 0, 0, 0.55);
+        padding: 1em 1.4em;
+        border-radius: 8px;
+        display: inline-block;
+      }
+      .map-row {
+        display: grid;
+        grid-template-columns: 1fr 60px 1fr;
+        gap: 16px;
+        align-items: center;
+        font-size: 0.85em;
+        margin: 0.4em 0;
+      }
+      .map-row .lhs {
+        text-align: right;
+        color: #cbd5f5;
+      }
+      .map-row .arrow {
+        color: var(--accent2);
+        font-weight: 700;
+      }
+      .map-row .rhs {
+        text-align: left;
+        color: var(--accent2);
+      }
+      .footer-meta {
+        position: fixed;
+        bottom: 8px;
+        left: 12px;
+        font-size: 0.55em;
+        color: #555;
+      }
+      .kicker {
+        color: var(--accent);
+        font-size: 0.55em;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        margin-bottom: 0.2em;
+      }
+      .center {
+        text-align: center;
+      }
+      ul.tight li,
+      ol.tight li {
+        margin: 0.15em 0;
+        line-height: 1.45;
+      }
+      .photoback {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        filter: brightness(0.32);
+      }
+      .stage {
+        position: relative;
+        z-index: 2;
+        padding: 2em;
+      }
+      .lead {
+        font-size: 1.4em;
+        line-height: 1.4;
+      }
+      .right-img {
+        float: right;
+        max-width: 36%;
+        margin-left: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <!-- ============================================ -->
+        <!-- 0. COLD OPEN                                  -->
+        <!-- ============================================ -->
+
+        <section
+          data-background-image="images/IMG_1141.jpg"
+          data-background-opacity="0.35"
+          data-background-size="cover"
+        >
+          <div style="padding-top: 1em">
+            <div class="kicker">Internal Tech Talk · 2026</div>
+            <h1 style="line-height: 1.3">
+              194工程のコース料理を<br /><span class="accent">AI-DLC</span
+              >で管理してみよう
+            </h1>
+            <p class="lead">
+              &amp; Claude だけで 3D モデルを作って<br />17F LODGE の 3D
+              プリンタで印刷して<br />Raspberry Pi を焼いてみよう
+            </p>
+            <p class="small">@ytonoyam</p>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- 1. 問題提起                                   -->
+        <!-- ============================================ -->
+
+        <section>
+          <h2>ラーメンを一度作ってみたかった...</h2>
+          <div class="grid grid-2" style="margin-top: 1em">
+            <img src="images/IMG_0093.jpg" alt="鋸で鶏骨を切断" />
+            <ul class="tight" style="font-size: 0.8em">
+              <li>実際やってみると大変だった話</li>
+              <li><span class="accent">AIがないと無理だった...</span>
+              </li>
+              <li>
+                準備は
+                <span class="accent">1ヶ月まで遡る</span
+              </li>
+            </ul>
+          </div>
+        </section>
+
+
+        <section>
+          <h2>当日コース</h2>
+          <div class="grid grid-3">
+            <div>
+              <img src="images/maguro.jpg" />
+              <p class="small center">前菜：生本マグロ中落ち1本 × 青種・赤種わさび体験</p>
+            </div>
+            <div>
+              <img src="images/ramen-i.jpg" />
+              <p class="small center">Ramen I：比内地鶏 × アサリ清湯</p>
+            </div>
+            <div>
+              <img src="images/granita.jpg" />
+              <p class="small center">お口直し：生茶葉のグラニテ</p>
+            </div>
+            <div>
+              <img src="images/tonkotsu.jpg" class="no-crop" />
+              <p class="small center">Ramen II：豚骨家系</p>
+            </div>
+            <div>
+              <img src="images/IMG_1131.jpg" />
+              <p class="small center">自家製麺（1mm / 3.5mm）</p>
+            </div>
+            <div>
+              <img src="images/IMG_1141.jpg" />
+              <p class="small center">Raspberry Pi スナップドラゴン寄せ</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>工程の内訳</h2>
+          <table style="margin: 0 auto; font-size: 0.72em">
+            <thead>
+              <tr>
+                <th>Unit</th>
+                <th>主な工程</th>
+                <th>工程数</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>前菜 <code>zensai-maguro</code></td>
+                <td>鮪解凍 / わさび準備 / 盛り付け / ゲスト摺り体験</td>
+                <td class="accent">6</td>
+              </tr>
+              <tr>
+                <td>Ramen I 清湯 <code>ramen-i-chintan</code></td>
+                <td>
+                  清湯スープ12・タレ4・自家製麺8・雲吞4・ツミレ9・鶏油4・夏長ネギ3・穂先メンマ10・盛り付け7
+                </td>
+                <td class="accent">61</td>
+              </tr>
+              <tr>
+                <td>お口直し <code>palate-cleanser-granita</code></td>
+                <td>生茶葉仕込 / 凍結 / 削り</td>
+                <td class="accent">8</td>
+              </tr>
+              <tr>
+                <td>Ramen II 豚骨 <code>ramen-ii-tonkotsu</code></td>
+                <td>
+                  呼び戻しスープ13・タレ5・細麺24・焼豚13・味玉6・メンマ11・マー油5・盛り付け10
+                </td>
+                <td class="accent">87</td>
+              </tr>
+              <tr>
+                <td>Dessert <code>dessert-raspberry-pi</code></td>
+                <td>パイ生地15 + いちごとマデイラのコンフィチュール + マデイラソース5 + バニラとトンカ豆のアイス8</td>
+                <td class="accent">28</td>
+              </tr>
+              <tr>
+                <td>Drinks <code>drinks</code></td>
+                <td>果汁氷の作り方（4工程・配合表のみ）</td>
+                <td class="accent">4</td>
+              </tr>
+              <tr>
+                <th colspan="2" style="text-align: right">合計</th>
+                <th class="accent" style="font-size: 1.2em">194</th>
+              </tr>
+            </tbody>
+          </table>
+          <p class="small" style="margin-top: 0.6em">
+            ※ 自家製麺（Ramen I = 8工程 / Ramen II = 24工程）は各 dish Unit
+            に内包。
+          </p>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- 2. AI-DLC 紹介                                -->
+        <!-- ============================================ -->
+
+        <section>
+          <div class="kicker">Chapter 2 · 登場人物</div>
+          <h2>AI-DLC とは何か</h2>
+          <div class="grid grid-2" style="margin-top: 1em; align-items: start">
+            <div>
+              <p class="lead accent" style="margin-bottom: 0.5em">
+                AI-Driven Development Lifecycle
+              </p>
+              <ul class="tight" style="font-size: 0.78em">
+                <li>
+                  <span class="accent">2025年に AWS が提唱</span>した、AI
+                  を前提に再設計された<br />ソフトウェア開発ライフサイクル
+                </li>
+                <li>
+                  従来の SDLC（Waterfall / Agile）は<br />"人間が書き、AI
+                  は補助" という前提
+                </li>
+                <li>
+                  AI-DLC は
+                  <span class="accent"
+                    >"AI が一次実装し、人間がレビュー・意思決定する"</span
+                  ><br />に主従を逆転させた前提モデル
+                </li>
+              </ul>
+            </div>
+            <div>
+              <p class="lead accent" style="margin-bottom: 0.5em">3つの特徴</p>
+              <ul class="tight" style="font-size: 0.78em">
+                <li>
+                  <span class="accent">① Intent-first</span
+                  ><br />「何を作るか」を
+                  <span class="muted">CLAUDE.md / spec / PRD</span>
+                  として明示的に書き、それを AI と共有する
+                </li>
+                <li>
+                  <span class="accent">② Unit 駆動</span><br />機能を
+                  <span class="muted">AI 1セッションで完結する小さな Unit</span>
+                  に分解し、独立に開発・テスト
+                </li>
+                <li>
+                  <span class="accent">③ Loop で進化</span><br />Inception →
+                  Construction → Operations が
+                  <span class="muted">何度も回る短いループ</span
+                  >。本番フィードバックが次の意図に直結する
+                </li>
+              </ul>
+            </div>
+          </div>
+          <p class="small" style="margin-top: 1em">
+            出典: AWS Builder Blog (2025)・Amazon Q Developer 公式ドキュメント
+          </p>
+        </section>
+
+        <section>
+          <h2>
+            AI-DLC<br /><span class="small accent"
+              >AI-Driven Development Lifecycle (AWS)</span
+            >
+          </h2>
+          <div class="grid grid-3" style="margin-top: 1.5em">
+            <div class="card">
+              <h3>Inception</h3>
+              <p class="small">
+                "なぜ作るか" を言語化。<br />意図・成功基準・スコープ。
+              </p>
+            </div>
+            <div class="card">
+              <h3>Construction</h3>
+              <p class="small">
+                Unit に分解。<br />1 Unit = 1 責務 = 独立に開発可能。
+              </p>
+            </div>
+            <div class="card">
+              <h3>Operations</h3>
+              <p class="small">
+                本番運用とフィードバック。<br />計測 → 学習 → 次イテレーション。
+              </p>
+            </div>
+          </div>
+          <p class="small" style="margin-top: 1.5em">
+            AI
+            とペアで「設計判断」をリポジトリに残しながら開発するライフサイクル。
+          </p>
+        </section>
+
+        <section>
+          <h2>
+            これって <span class="accent">料理会の進行</span> と同じでは？
+          </h2>
+          <div class="grid grid-3" style="margin-top: 1.5em">
+            <div class="card">
+              <h3>献立決め</h3>
+              <p class="small">コース設計・誰に何を体験させたいか</p>
+            </div>
+            <div class="card">
+              <h3>仕込み</h3>
+              <p class="small">1皿 = 1 Unit として独立に試作</p>
+            </div>
+            <div class="card">
+              <h3>当日提供</h3>
+              <p class="small">配膳順・温度・ゲスト反応をログ化</p>
+            </div>
+          </div>
+          <p class="lead accent" style="margin-top: 1em">
+            じゃあ、料理会を AI-DLC でリポジトリ管理してみよう。
+          </p>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- 3. アナロジー転換                              -->
+        <!-- ============================================ -->
+
+        <section>
+          <h2>ソフトウェア ↔ 料理会</h2>
+          <div style="margin-top: 1em">
+            <div class="map-row">
+              <div class="lhs">Inception</div>
+              <div class="arrow">↔</div>
+              <div class="rhs">コース全体設計・"何を感じさせるか"</div>
+            </div>
+            <div class="map-row">
+              <div class="lhs">Unit / モジュール</div>
+              <div class="arrow">↔</div>
+              <div class="rhs">1 皿（前菜・Ramen I・Ramen II ...）</div>
+            </div>
+            <div class="map-row">
+              <div class="lhs">Cross-Cutting Concerns</div>
+              <div class="arrow">↔</div>
+              <div class="rhs">調達・進行・もてなし・コスト</div>
+            </div>
+            <div class="map-row">
+              <div class="lhs">CI / 試運転</div>
+              <div class="arrow">↔</div>
+              <div class="rhs">試作 → 本番調整</div>
+            </div>
+            <div class="map-row">
+              <div class="lhs">Observability</div>
+              <div class="arrow">↔</div>
+              <div class="rhs">コスト分析 HTML / 仕込みログ</div>
+            </div>
+            <div class="map-row">
+              <div class="lhs">Dependency Management</div>
+              <div class="arrow">↔</div>
+              <div class="rhs">仕入れ表（procurement）</div>
+            </div>
+            <div class="map-row">
+              <div class="lhs">CLAUDE.md / README</div>
+              <div class="arrow">↔</div>
+              <div class="rhs">レシピ・前提情報</div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          data-background-image="images/IMG_1113.jpg"
+          data-background-opacity="0.35"
+        >
+          <div class="hero-overlay">
+            <h1 style="font-size: 2.2em">
+              AI でレシピを管理することで<br /><span class="accent"
+                >大幅に手間を削減</span
+              >
+            </h1>
+            <p class="small">
+              → <code>github.com/ytonoyam/ryourikai</code>（仮）
+            </p>
+          </div>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- 4. Repository ツアー                           -->
+        <!-- ============================================ -->
+
+        <section>
+          <div class="kicker">Chapter 4</div>
+          <h2>Repository 構造ツアー</h2>
+          <pre class="tree"><code>ryourikai/
+├── CLAUDE.md              # プロジェクト憲法 (在庫・設備・前提)
+├── inception/             # なぜ作るか / 成功基準 / コース全体像
+└── units/
+    ├── dish/              # 1 Unit = 1 皿
+    │   ├── zensai-maguro/
+    │   ├── ramen-i-chintan/
+    │   ├── palate-cleanser-granita/
+    │   ├── ramen-ii-tonkotsu/
+    │   ├── dessert-raspberry-pi/
+    │   └── drinks/
+    └── cross/             # 横断的関心ごと
+        ├── procurement/
+        ├── schedule/
+        ├── noodle-craft/
+        ├── hospitality/
+        └── cost-analysis/</code></pre>
+        </section>
+
+        <section
+          data-background-image="images/IMG_1113.jpg"
+          data-background-opacity="0.25"
+        >
+          <h2>inception/</h2>
+          <ul class="tight" style="font-size: 0.85em">
+            <li>
+              料理会の
+              <span class="accent">意図</span
+              >：「一度、ハイクオリティなラーメンを作ってみたかった」
+            </li>
+            <li>
+              <span class="accent">成功基準</span>：美味しい料理 / 食中毒回避 /
+              アレルギー対応
+            </li>
+            <li>
+              <span class="accent">スコープ非対象</span>：持ち帰り / プロ厨房
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>units/dish/ — 6 Unit</h2>
+          <div class="grid grid-3">
+            <div class="card">
+              <h3 style="font-size: 0.78em">前菜マグロ</h3>
+              <img src="images/maguro.jpg" />
+              <p class="small">マグロ × 青種/赤種わさび × 木桶熟成たまり</p>
+            </div>
+            <div class="card">
+              <h3 style="font-size: 0.78em">比内地鶏×アサリ清湯ラーメン</h3>
+              <img src="images/ramen-i.jpg" />
+              <p class="small">Ramen I：清湯 + つみれ仕様</p>
+            </div>
+            <div class="card">
+              <h3 style="font-size: 0.78em">生茶葉のグラニテ</h3>
+              <img src="images/granita.jpg" />
+              <p class="small">お口直し：静岡県産</p>
+            </div>
+            <div class="card">
+              <h3 style="font-size: 0.78em">俺たちの濃厚豚骨ラーメン</h3>
+              <img src="images/tonkotsu.jpg" class="no-crop" />
+              <p class="small">Ramen II：呼び戻し・家系仕様</p>
+            </div>
+            <div class="card">
+              <h3 style="font-size: 0.7em">
+                Raspberry Pi スナップドラゴン寄せ
+              </h3>
+              <img src="images/IMG_1141.jpg" />
+              <p class="small">デザート Unit のメインピース ★</p>
+            </div>
+            <div class="card">
+              <h3 style="font-size: 0.7em">愛媛 生搾り清見タンゴール</h3>
+              <img src="images/drinks-kiyomi.png" />
+              <p class="small">drinks Unit のドリンクペアリング</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>1 Unit を開けてみる — <code>ramen-i-chintan/</code></h2>
+          <div class="grid grid-2">
+            <pre class="tree"><code>ramen-i-chintan/
+├── README.md         # この皿は何か
+├── recipe.md         # 12人前レシピ・本番仕様
+├── trial-recipe.md   # 1/4分量・試作用
+├── tare/             # カエシ（タレ）
+├── soup/             # 鶏 + アサリのスープ
+├── tsumire/          # つみれ
+└── notes.md          # 試作ログ・調整履歴</code></pre>
+            <ul class="tight" style="font-size: 0.8em">
+              <li>
+                外から見えるのは
+                <span class="accent">README + recipe</span> だけ
+              </li>
+              <li>内部実装（tare/soup/tsumire）は隠蔽</li>
+              <li>
+                分量・配合を変えても
+                <span class="accent">Unit 境界の外には漏れない</span>
+              </li>
+              <li>
+                他の Unit がこの Unit に依存することは
+                <span class="accent">無い</span>（cross/ 経由でしか繋がらない）
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2>料理にもモジュール境界がある</h2>
+          <ul class="tight" style="font-size: 0.9em">
+            <li>「Ramen I のスープのレシピ変更」が「デザート」を壊さない</li>
+            <li>
+              「製麺の切断幅変更」は
+              <span class="accent">noodle-craft Unit に閉じる</span>（dish/
+              には伝播しない）
+            </li>
+            <li>「仕入れ先変更」も procurement に閉じる</li>
+          </ul>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- 5. 横断 Unit                                  -->
+        <!-- ============================================ -->
+
+        <section>
+          <div class="kicker">Chapter 5</div>
+          <h2>units/cross/ — 5 つの横断 Unit</h2>
+          <div class="grid grid-3" style="margin-top: 1em">
+            <div class="card">
+              <h3>procurement</h3>
+              <p class="small">Dependency Management</p>
+            </div>
+            <div class="card">
+              <h3>schedule</h3>
+              <p class="small">Critical Path / Orchestration</p>
+            </div>
+            <div class="card">
+              <h3>noodle-craft</h3>
+              <p class="small">Shared Library</p>
+            </div>
+            <div class="card">
+              <h3>hospitality</h3>
+              <p class="small">UX Design</p>
+            </div>
+            <div class="card">
+              <h3>cost-analysis</h3>
+              <p class="small">Observability / Metrics</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>procurement <span class="tag">DEPS</span></h2>
+          <div class="grid grid-2">
+            <img src="images/IMG_0948.jpg" />
+            <ul class="tight" style="font-size: 0.8em">
+              <li>
+                各 Unit のレシピが要求する
+                <span class="accent">原材料を集約</span>
+              </li>
+              <li>
+                "豚骨" は Ramen II が要求するが、ストックに置くのは procurement
+                の責務
+              </li>
+              <li>
+                規格不整合（例：生クリーム 35% / 45%）を
+                <span class="accent">一元検知</span>
+              </li>
+            </ul>
+          </div>
+          <p class="small">
+            npm でいう <code>package.json</code>。料理会の lockfile。
+          </p>
+        </section>
+
+        <section>
+          <h2>schedule <span class="tag">ORCH</span></h2>
+          <pre
+            style="font-size: 0.55em; text-align: left"
+          ><code class="language-text">D-3 ──── 仕入れ完了 / 鶏ガラ・豚骨の下処理開始
+D-2 ──── スープ第一段（豚骨圧力 6h × 2回）
+D-1 ──── ① スープ清湯 ② カエシ ③ つみれ ④ パイ生地 ⑤ コンフィ
+         15:00  製麺（Ramen II 用 1mm）
+         18:00  製麺（Ramen I 用 3.5mm）
+D-Day  ──┬─ 11:00  前菜セッティング（わさび摺り器の配置）
+         ├─ 12:00  ゲスト着席 → 前菜
+         ├─ 12:25  Ramen I 茹で開始
+         ├─ 12:35  Ramen I 配膳（並列調理：12人前を 6+6 で分割）
+         ├─ 13:10  お口直し
+         ├─ 13:25  Ramen II 配膳
+         └─ 14:00  デザート → クロージング</code></pre>
+          <p class="small">
+            → Critical Path = スープ。並列度を上げると IH
+            不足で詰まる。物理リソースが制約。
+          </p>
+        </section>
+
+        <section>
+          <h2>noodle-craft <span class="tag">SHARED-LIB</span></h2>
+          <div class="grid grid-2" style="align-items: center">
+            <table style="font-size: 0.6em; margin: 0">
+              <thead>
+                <tr>
+                  <th>パラメータ</th>
+                  <th>Ramen I (清湯)</th>
+                  <th>Ramen II (豚骨)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>粉ブレンド</td>
+                  <td>特ナンバーワン 70% +<br />飛行船 30%</td>
+                  <td>特飛龍 60% +<br />勇 40%</td>
+                </tr>
+                <tr>
+                  <td>加水率</td>
+                  <td class="accent">43%</td>
+                  <td class="accent">40%</td>
+                </tr>
+                <tr>
+                  <td>切断幅</td>
+                  <td class="accent">3.5mm（平打ち）</td>
+                  <td class="accent">1mm（細麺）</td>
+                </tr>
+                <tr>
+                  <td>厚み</td>
+                  <td>1.5mm</td>
+                  <td>1.2mm</td>
+                </tr>
+                <tr>
+                  <td>麺量/杯</td>
+                  <td>50g</td>
+                  <td>60g</td>
+                </tr>
+                <tr>
+                  <th
+                    colspan="3"
+                    style="text-align: center; padding-top: 0.4em"
+                  >
+                    ↓ 共通インターフェース ↓
+                  </th>
+                </tr>
+                <tr>
+                  <td>工程</td>
+                  <td colspan="2" class="accent" style="text-align: center">
+                    計量 → ミキシング → 圧延 → 休ませ → 切り出し
+                  </td>
+                </tr>
+                <tr>
+                  <td>製麺機</td>
+                  <td colspan="2" style="text-align: center">
+                    ATLAS 150（共通設備）
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <img src="images/IMG_1125.jpg" />
+          </div>
+          <p class="small" style="margin-top: 0.6em">
+            → パラメータだけ Ramen Unit から渡し、工程は
+            <code>noodle-craft</code> に閉じる。<span class="accent"
+              >= テンプレートメソッドパターン</span
+            >
+          </p>
+        </section>
+
+        <section>
+          <h2>cost-analysis <span class="tag">METRICS</span></h2>
+          <img
+            src="images/cost-current.png"
+            style="max-height: 430px; width: auto"
+          />
+          <p class="large" style="margin-top: 0.4em">
+            今回は無駄な仕入れが多く1人<span
+              class="accent"
+              >3000円</span
+            >だった。
+            <br />
+            ちゃんと詰めれば<span
+              class="accent"
+              >2500円</span
+            >付近まで抑えられそう
+            <br />
+          </p>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- 6. Claude 協働                                -->
+        <!-- ============================================ -->
+
+        <section>
+          <div class="kicker">Chapter 6</div>
+          <h2>Claude との協働</h2>
+          <pre
+            style="font-size: 0.55em; text-align: left; max-height: 480px"
+          ><code class="language-markdown"># Ramen Ryourikai
+ラーメン料理会 - 同期エンジニア12人に振る舞うラーメンコース料理の管理リポジトリ。
+本リポジトリは AWS AI-DLC 構造で整理されている。
+
+## ナビゲーション
+| パス | 内容 |
+|------|------|
+| `inception/` | 料理会の意図・成功基準・コース全体像 |
+| `units/dish/` | 各料理（前菜・Ramen I・お口直し・Ramen II・デザート・Drinks）|
+| `units/cross/` | 横断 Unit（procurement・schedule・hospitality・noodle-craft・cost-analysis）|
+
+## 製麺設備 / 在庫 / 醤油 / みりん / スープ塩分濃度 ...</code></pre>
+          <p class="small">
+            CLAUDE.md = リポジトリのコンテキストファイル。AI
+            とのペアリングで「毎回説明し直さなくていい」憲法。
+          </p>
+        </section>
+
+        <section>
+          <h2>
+            Git log — 設計判断は <span class="accent">commit に残る</span>
+          </h2>
+          <pre
+            style="font-size: 0.6em; text-align: left"
+          ><code class="language-text">2ac0f7a Refactor cost analysis visualizations and update ingredient details
+2e18f55 Add zensai-maguro dish documentation and recipe
+e74d604 feat: Ramen I をツミレ仕様に変更 + スープ比率 7:3 確定
+0135153 feat: Ramen I 仕様確定（コース料理サイズ・親鳥コンフィ・実山椒風味）
+c61a47b fix: ラズベリーパッセコンフィチュールのレシピをジャム仕様に変更し、砂糖比率を50%に調整
+bb1f4ca feat: 麺だけ20人前仕様に増量（試作・茹でロス・バッファ対応）
+1812e92 docs: 料理会本番に向けた全レシピ・スケジュール最終版
+23cdbac docs: おもてなし・仕込みスケジュール・塩分濃度を追加
+8d8d759 docs: 麺無双3.5mm初回試作フルレシピを追加</code></pre>
+          <p class="small">
+            → "なぜその配合にしたか" が
+            <span class="accent">後から辿れる</span>。試作の意思決定が消えない。
+          </p>
+        </section>
+
+        <section>
+          <h2>AI ペアで料理を設計する感触</h2>
+          <ul class="tight" style="font-size: 0.9em">
+            <li>
+              <span class="accent">迷ったら CLAUDE.md と会話する</span
+              >（"塩分濃度どうする？" → 在庫醤油の塩分濃度から逆算）
+            </li>
+            <li>
+              設計判断ログが残るので、<span class="accent"
+                >気が変わった時に揺れない</span
+              >
+            </li>
+            <li>
+              レシピを更新すると
+              <span class="accent">cost-analysis が連動して更新</span
+              >される（試作ループが回しやすい）
+            </li>
+            <li>
+              料理は実装より <span class="accent">対話設計</span> の比重が大きい
+              — AI と合う
+            </li>
+          </ul>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- 7. 3D 編                                       -->
+        <!-- ============================================ -->
+
+        <section data-background-color="#1a1a1a">
+          <h1 style="font-size: 2.6em">
+            さて、ここから <span class="accent">            <br />話が変わります。</span>
+          </h1>
+          <p class="small">3D printing / Raspberry Pi / 17F LODGE</p>
+        </section>
+
+        <section>
+          <h2>
+            Raspberry Pi のパイ焼いてみてみたい
+          </h2>
+          <div class="grid grid-2">
+            <ul class="tight" style="font-size: 0.85em">
+              <li>料理会でRaspberry Piのパイを焼いたら面白そう</li>
+              <li>
+                スナップドラゴン(食用花の金魚草の英名)も飾りにしたらより面白そう
+              </li>
+                <li>
+                カンファレンスの自己紹介のネタとしても面白いかも
+              </li>
+            </ul>
+            <img src="images/IMG_1141.jpg" style="max-height: 440px" />
+          </div>
+        </section>
+
+        <section>
+          <h2>
+            試作：手切りでは <span class="accent">うまく切り取れなかった</span>
+          </h2>
+          <div class="grid grid-2" style="align-items: center">
+            <img src="images/IMG_0967.jpeg" style="max-height: 440px" />
+            <ul class="tight" style="font-size: 0.78em">
+              <li>
+                最初は
+                <span class="accent">手切りで Pi ロゴ</span>を再現してみた
+              </li>
+              <li>葉のヘキサゴンは円が多すぎてナイフでは精度が出ない</li>
+              <li>線がガタつく・大きさが揃わない・生地が裂ける</li>
+              <li>
+                →
+                <span class="accent">紀尾井町 17F LODGE の 3D プリンタ</span
+                >で型を印刷することを決意
+              </li>
+              <li>= "普通のクッキー型は売っていない、なら作るしかない"</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h2>Claude と Python で 3D モデル化</h2>
+          <div class="grid grid-2" style="align-items: start">
+            <pre
+              style="font-size: 0.48em; text-align: left; margin: 0"
+            ><code class="language-python"># make_cutter.py（~500 行）
+import numpy as np
+from PIL import Image
+from scipy import ndimage
+
+TARGET_WIDTH_MM    = 63.0  # 63mm / 100mm の2サイズ
+CUTTER_HEIGHT_MM   = 12.0  # 5mm 生地 + 7mm grip
+WALL_THICKNESS_MM  = 1.2
+FLANGE_WIDTH_MM    = 2.5
+N_OUTER            = 600   # 外周サンプリング
+N_HOLE             = 96    # 穴サンプリング
+SOLID_DIAMETER_MM  = 5.0   # 小さい円は実心ポスト
+
+# Pipeline:
+#   PNG (公式 Pi ロゴ)
+#     ↓  PIL + scipy.ndimage
+#   silhouette mask + 内部穴マスク
+#     ↓  Moore-Neighbor 境界トレース
+#   外側多角形 + 穴多角形
+#     ↓  法線オフセット
+#   inner / flange / hole-inner リング
+#     ↓  組み立て
+#   outer cutter + 内部 tube + 連結 strut
+#     ↓
+#   SVG プレビュー + ASCII STL</code></pre>
+            <div>
+              <ul class="tight" style="font-size: 0.62em">
+                <li>
+                  入力：<span class="accent">Raspberry Pi 公式ロゴ PNG</span>
+                </li>
+                <li>
+                  Claude Code に「Pi ロゴから生地カッターの STL を作って」と依頼
+                </li>
+                <li>
+                  <span class="accent">Python（numpy / PIL / scipy）</span>
+                  で実装
+                </li>
+                <li>
+                  処理は <span class="accent">3 段階</span>：<br />
+                  ① <span class="accent">PNG</span>（ロゴ画像）→
+                  ロゴだけを切り出し<br />
+                  ② <span class="accent">SVG</span>（2D の輪郭線）に変換<br />
+                  ③ <span class="accent">STL</span>（厚みを付けた 3D
+                  型）として書き出し
+                </li>
+                <li>
+                  出力：<code>raspi_cutter_63mm.stl</code> /
+                  <code>_100mm.stl</code>
+                </li>
+              </ul>
+              <img
+                src="images/cutter-preview.png"
+                style="
+                  max-height: 170px;
+                  margin-top: 0.4em;
+                  background: rgba(255, 255, 255, 0.05);
+                  border-radius: 4px;
+                "
+              />
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>
+            設計の工夫：<span class="accent">印刷の向き</span>でサポート材を回避
+          </h2>
+          <div style="margin: 0.5em 0">
+            <p class="small" style="margin: 0.3em 0">
+              <span class="accent">前提：</span>3D
+              プリンタは下から上に層を積む。空中に張り出した部分は
+              <span class="accent">"サポート材"</span
+              >（捨て柱）で支える必要があり、印刷後に剥がす作業＋表面に跡が残る。
+            </p>
+          </div>
+          <div class="grid grid-2" style="margin-top: 0.6em">
+            <div class="card" style="padding: 1em">
+              <h3 style="font-size: 0.9em; color: #ff7070">
+                ✕ 刃を下にして印刷
+              </h3>
+              <p class="small" style="font-size: 0.66em">
+                刃（細い）が接地 → 持ち手のフランジ（広い）が
+                <span style="color: #ff9090">空中に張り出す</span><br />
+                <span class="accent">サポート材が必要</span> →
+                剥がす手間＋刃の表面に跡
+              </p>
+            </div>
+            <div
+              class="card"
+              style="padding: 1em; border-color: var(--accent2)"
+            >
+              <h3 style="font-size: 0.9em" class="accent">
+                ✓ 持ち手を下にして印刷（採用）
+              </h3>
+              <p class="small" style="font-size: 0.66em">
+                広い <span class="accent">持ち手のフランジを接地</span> →
+                上に向かって刃まで地続きに積み上がる<br />
+                →
+                <span class="accent">サポート材ゼロ</span
+                >。剥がし作業なし＋刃側がツルツル仕上がる
+              </p>
+            </div>
+          </div>
+          <p class="small" style="margin-top: 0.6em">
+            <code>make_cutter.py</code> の
+            <code>FLIP_FOR_PRINT = True</code> パラメータで自動で上下反転
+          </p>
+        </section>
+
+        <section data-background-color="#0d0d0d">
+          <h2>17F LODGE で印刷</h2>
+          <div class="grid grid-4" style="margin-top: 0.5em">
+            <div>
+              <img src="images/lodge-lounge.jpg" />
+              <p class="small center">① 17F LODGE 入口</p>
+            </div>
+            <div>
+              <img src="images/lodge-printer-pc.jpg" />
+              <p class="small center">② Bambu Studio でスライス</p>
+            </div>
+            <div>
+              <img src="images/lodge-printer.jpg" />
+              <p class="small center">③ Bambu Lab プリンタ（AMS 付き）</p>
+            </div>
+            <div>
+              <img src="images/lodge-printing-start.jpg" />
+              <p class="small center">④ プリント開始（Bambu Lab ヘッド）</p>
+            </div>
+          </div>
+          <ul class="tight" style="font-size: 0.7em; margin-top: 0.6em">
+            <li>社内メイカースペース「LODGE」（17F・誰でも使える）</li>
+            <li>Slackチャンネル #z-lodge-maker-comm でサポート依頼可能</li>
+            <li>
+              プリンタ：<span class="accent">Bambu Lab X1 Carbon</span>
+            </li>
+            <li>
+              素材：<span class="accent">PLA（青色）</span
+              >。万一飲み込んでも無害＋青は自然食品に少なく
+              <span class="accent">異物混入時に視認しやすい</span>
+            </li>
+            <li>
+              印刷時間：約 <span class="accent">2時間</span> × 2サイズ（63mm /
+              100mm）
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>
+            印刷タイムラプス
+            <span class="small muted">（約2時間 → 7.5秒）</span>
+          </h2>
+          <video
+            src="images/printing-timelapse.mp4"
+            autoplay
+            loop
+            muted
+            playsinline
+            style="
+              max-height: 520px;
+              max-width: 100%;
+              border-radius: 6px;
+              box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+            "
+          ></video>
+          <p class="small" style="margin-top: 0.4em">
+            9 フレームを ffmpeg で結合。ノズルが Pi
+            ロゴの輪郭を描き、徐々に立体化していく。
+          </p>
+        </section>
+
+        <section>
+          <h2>印刷 → タルト型抜き → 焼成</h2>
+          <div
+            class="grid grid-4"
+            style="margin-top: 1.5em; align-items: stretch"
+          >
+            <div class="card center" style="padding: 1em">
+              <div style="font-size: 2.6em">📐</div>
+              <h3 style="font-size: 0.85em">① モデル</h3>
+              <p class="small">Claude と対話 → STL</p>
+            </div>
+            <div class="card center" style="padding: 1em">
+              <div style="font-size: 2.6em">🖨️</div>
+              <h3 style="font-size: 0.85em">② 印刷</h3>
+              <p class="small">LODGE 17F・PLA・約2h。成形後、フィラメントの糸引きを除去</p>
+            </div>
+            <div class="card center" style="padding: 1em">
+              <div style="font-size: 2.6em">🍓</div>
+              <h3 style="font-size: 0.85em">③ 抜き型</h3>
+              <p class="small">パイ生地を Pi ロゴに型抜き</p>
+            </div>
+            <div class="card center" style="padding: 1em">
+              <div style="font-size: 2.6em">🔥</div>
+              <h3 style="font-size: 0.85em">④ 焼成</h3>
+              <p class="small">200℃で15分、ロゴが立体的に膨らむ</p>
+            </div>
+          </div>
+          <p class="small accent" style="margin-top: 2em">
+            パイプライン全体を
+            <span class="accent">Claude との対話 4 セッション</span>で完了。
+          </p>
+        </section>
+
+        <section>
+          <h2>
+            本番：<span class="accent">Raspberry Pi スナップドラゴン寄せ</span>
+          </h2>
+          <img src="images/IMG_1141.jpg" style="max-height: 480px" />
+          <p class="small accent">
+            →
+            <code>units/dish/dessert-raspberry-pi/</code>
+            の最終アウトプット。<br />中央のヘキサゴン =
+            3Dプリント・カッターで抜いたパイ生地。<br />周囲のスナップドラゴンの花とラズベリーで盛り付け。
+          </p>
+        </section>
+
+        <!-- ============================================ -->
+        <!-- 8. 当日コース                                 -->
+        <!-- ============================================ -->
+
+        <section>
+          <h2>当日コース</h2>
+          <div class="grid grid-3">
+            <div>
+              <img src="images/maguro.jpg" />
+              <p class="small center">前菜：マグロ × わさび体験</p>
+            </div>
+            <div>
+              <img src="images/ramen-i.jpg" />
+              <p class="small center">Ramen I：比内地鶏 × アサリ清湯</p>
+            </div>
+            <div>
+              <img src="images/granita.jpg" />
+              <p class="small center">お口直し：生茶葉のグラニテ</p>
+            </div>
+            <div>
+              <img src="images/tonkotsu.jpg" class="no-crop" />
+              <p class="small center">Ramen II：豚骨家系</p>
+            </div>
+            <div>
+              <img src="images/IMG_1131.jpg" />
+              <p class="small center">自家製麺（1mm / 3.5mm）</p>
+            </div>
+            <div>
+              <img src="images/IMG_1141.jpg" />
+              <p class="small center">Raspberry Pi スナップドラゴン寄せ</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>裏方：1人キッチンでは無理だった</h2>
+          <div class="grid grid-2" style="align-items: center">
+            <img src="images/IMG_1113.jpg" />
+            <ul class="tight" style="font-size: 0.78em">
+              <li>
+                同期の
+                <span class="accent">nagata san</span>
+                にかなり協力して頂きながら<br />なんとか作り切りました 🙇‍♂️
+              </li>
+              <li>
+                自分のわがままに付き合って頂き<br />本当に
+                <span class="accent">感謝しかない</span>です 🙏
+              </li>
+              <li>
+                13:00 から 18:00 提供のはずが
+                <span class="accent">14:00 提供開始 / 19:10 提供終了</span>
+                となりました 😭
+              </li>
+              <li>めちゃ遅れてしまってごめんなさい 🙏</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/highlight/highlight.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.6.1/plugin/notes/notes.js"></script>
+    <script>
+      Reveal.initialize({
+        hash: true,
+        controls: true,
+        progress: true,
+        slideNumber: "c/t",
+        transition: "slide",
+        backgroundTransition: "fade",
+        width: 1280,
+        height: 800,
+        margin: 0.05,
+        plugins: [RevealHighlight, RevealNotes],
+      });
+    </script>
+  </body>
+</html>
